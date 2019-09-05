@@ -14,7 +14,7 @@ module Fastlane
         releases = JSON.parse(list_response.body)
 
         if releases.nil?
-          UI.error "No versions found for #{config[:app_name]} owned by #{config[:owner_name]}"
+          UI.error("No versions found for #{config[:app_name]} owned by #{config[:owner_name]}")
           return nil
         end
 
@@ -22,7 +22,7 @@ module Fastlane
         latest_build = releases.first
 
         if latest_build.nil?
-          UI.error "The app has no versions yet"
+          UI.error("The app has no versions yet")
           return nil
         end
 
@@ -43,25 +43,25 @@ module Fastlane
                                        env_name: "APPCENTER_API_TOKEN",
                                        description: "API Token for AppCenter Access",
                                        verify_block: proc do |value|
-                                         UI.user_error!("No API token for AppCenter given, pass using `api_token: 'token'`") unless value and !value.empty?
+                                         UI.user_error!("No API token for AppCenter given, pass using `api_token: 'token'`") unless value && !value.empty?
                                        end),
           FastlaneCore::ConfigItem.new(key: :owner_name,
                                        env_name: "APPCENTER_OWNER_NAME",
                                        description: "Name of the owner of the application on AppCenter",
                                        verify_block: proc do |value|
-                                         UI.user_error!("No owner name for AppCenter given, pass using `owner_name: 'owner name'`") unless value and !value.empty?
+                                         UI.user_error!("No owner name for AppCenter given, pass using `owner_name: 'owner name'`") unless value && !value.empty?
                                        end),
           FastlaneCore::ConfigItem.new(key: :app_name,
                                        env_name: "APPCENTER_APP_NAME",
                                        description: "Name of the application on AppCenter",
                                        verify_block: proc do |value|
-                                         UI.user_error!("No app name for AppCenter given, pass using `app_name: 'app name'`") unless value and !value.empty?
-                                       end),
+                                         UI.user_error!("No app name for AppCenter given, pass using `app_name: 'app name'`") unless value && !value.empty?
+                                       end)
         ]
       end
 
       def self.is_supported?(platform)
-        [:ios, :android].include? platform
+        [:ios, :android].include?(platform)
       end
     end
   end
