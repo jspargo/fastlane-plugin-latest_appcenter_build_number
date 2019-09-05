@@ -22,8 +22,11 @@ You can fetch the latest version for a given app with the following command in y
 ```ruby
 version_number = latest_appcenter_build_number
 ```
-this will use the enviroment variables `APPCENTER_API_TOKEN`, `APPCENTER_OWNER_NAME`, and `APPCENTER_APP_NAME` (optional)
-
+this will use the environment variable `APPCENTER_API_TOKEN` to fetch the list of apps for a given owner account, and then prompt you for which one to use. This can also be specified as a parameter, e.g.:
+```ruby
+version_number = latest_appcenter_build_number(api_token: "my-APPCENTER-api-token")
+```
+ The parameters `owner_name` and `app_name`, or environment variables `APPCENTER_OWNER_NAME`, and `APPCENTER_APP_NAME`, can also be set:
 ```ruby
 version_number = latest_appcenter_build_number(
   api_token: "my-APPCENTER-api-token", # note that this will need to be generated from here: https://appcenter.ms/settings/apitokens
