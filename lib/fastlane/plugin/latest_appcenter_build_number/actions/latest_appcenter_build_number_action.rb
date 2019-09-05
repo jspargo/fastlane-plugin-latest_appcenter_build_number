@@ -1,46 +1,70 @@
-require 'fastlane/action'
-require_relative '../helper/latest_appcenter_build_number_helper'
+require 'json'
+require 'net/http'
 
 module Fastlane
   module Actions
     class LatestAppcenterBuildNumberAction < Action
-      def self.run(params)
-        UI.message("The latest_appcenter_build_number plugin is working!")
+      def self.run(config)
+        host_uri = URI.parse('https://rink.hockeyapp.net')
+        http = Net::HTTP.new(host_uri.host, host_uri.port)
+        http.use_ssl = true
+        list_request = Net::HTTP::Get.new('/api/2/apps')
+        list_request['X-HockeyAppToken'] = config[:api_token]
+        list_response = http.request(list_request)
+        app_list = JSON.parse(list_response.body)['apps']
+
+        app = app_list.find { |app| app['bundle_identifier'] == config[:bundle_id] }
+
+        if app.nil?
+          UI.error "No application with bundle id #{config[:bundle_id]}"
+          return nil
+        end
+
+        app_identifier = app['public_identifier']
+
+        details_request = Net::HTTP::Get.new("/api/2/apps/#{app_identifier}/app_versions?page=1")
+        details_request['X-HockeyAppToken'] = config[:api_token]
+        details_response = http.request(details_request)
+
+        app_details = JSON.parse(details_response.body)
+        latest_build = app_details['app_versions'].find{ |version| version['status'] != -1 }
+
+        if latest_build.nil?
+          UI.error "The app has no versions yet"
+          return nil
+        end
+
+        return latest_build['version']
       end
 
       def self.description
-        "Use AppCenter API to get the latest version and build number for an App Center app"
+        "Gets latest version number of the app with the bundle id from HockeyApp"
       end
 
       def self.authors
-        ["Jack Spargo"]
-      end
-
-      def self.return_value
-        # If your method provides a return value, you can describe here what it does
-      end
-
-      def self.details
-        # Optional:
-        "Use AppCenter API to get the latest version and build number for an App Center app"
+        ["pahnev", "FlixBus (original author)"]
       end
 
       def self.available_options
         [
-          # FastlaneCore::ConfigItem.new(key: :your_option,
-          #                         env_name: "LATEST_APPCENTER_BUILD_NUMBER_YOUR_OPTION",
-          #                      description: "A description of your option",
-          #                         optional: false,
-          #                             type: String)
+          FastlaneCore::ConfigItem.new(key: :api_token,
+                                       env_name: "FL_HOCKEY_API_TOKEN",
+                                       description: "API Token for Hockey Access",
+                                       verify_block: proc do |value|
+                                         UI.user_error!("No API token for Hockey given, pass using `api_token: 'token'`") unless value and !value.empty?
+                                       end),
+          FastlaneCore::ConfigItem.new(key: :bundle_id,
+                                       env_name: "FL_HOCKEY_BUNDLE_ID",
+                                       description: "Bundle ID of the application",
+                                       default_value: CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
+                                       verify_block: proc do |value|
+                                         UI.user_error!("No bundle ID for Hockey given, pass using `bundle_id: 'bundle id'`") unless value and !value.empty?
+                                       end),
         ]
       end
 
       def self.is_supported?(platform)
-        # Adjust this if your plugin only works for a particular platform (iOS vs. Android, for example)
-        # See: https://docs.fastlane.tools/advanced/#control-configuration-by-lane-and-by-platform
-        #
-        # [:ios, :mac, :android].include?(platform)
-        true
+        [:ios, :android].include? platform
       end
     end
   end
