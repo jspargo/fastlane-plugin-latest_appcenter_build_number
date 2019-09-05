@@ -23,7 +23,7 @@ module Fastlane
         list_request['X-API-Token'] = config[:api_token]
         list_response = http.request(list_request)
 
-        if list_response.kind_of? Net::HTTPForbidden
+        if list_response.kind_of?(Net::HTTPForbidden)
           UI.error("API Key not valid for #{owner_name}. This will be because either the API Key or the owner_name are incorrect")
           return nil
         end
