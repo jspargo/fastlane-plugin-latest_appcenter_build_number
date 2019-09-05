@@ -11,8 +11,13 @@ module Fastlane
         list_request = Net::HTTP::Get.new("/v0.1/apps/#{config[:owner_name]}/#{config[:app_name]}/releases")
         list_request['X-API-Token'] = config[:api_token]
         list_response = http.request(list_request)
-        releases = JSON.parse(list_response.body)
 
+        if list_response.kind_of? Net::HTTPForbidden
+          UI.error("API Key not valid for #{config[:owner_name]}. This will be because either the API Key or the owner_name are incorrect")
+          return nil
+        end
+
+        releases = JSON.parse(list_response.body)
         if releases.nil?
           UI.error("No versions found for #{config[:app_name]} owned by #{config[:owner_name]}")
           return nil
