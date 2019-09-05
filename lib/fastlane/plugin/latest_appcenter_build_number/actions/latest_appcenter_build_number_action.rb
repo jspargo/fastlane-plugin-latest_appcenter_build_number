@@ -5,29 +5,21 @@ module Fastlane
   module Actions
     class LatestAppcenterBuildNumberAction < Action
       def self.run(config)
-        host_uri = URI.parse('https://rink.hockeyapp.net')
+        host_uri = URI.parse('https://api.appcenter.ms')
         http = Net::HTTP.new(host_uri.host, host_uri.port)
         http.use_ssl = true
-        list_request = Net::HTTP::Get.new('/api/2/apps')
-        list_request['X-HockeyAppToken'] = config[:api_token]
+        list_request = Net::HTTP::Get.new("/v0.1/apps/#{config[:owner_name]}/#{config[:app_name]}/releases")
+        list_request['X-API-Token'] = config[:api_token]
         list_response = http.request(list_request)
-        app_list = JSON.parse(list_response.body)['apps']
+        releases = JSON.parse(list_response.body)
 
-        app = app_list.find { |app| app['bundle_identifier'] == config[:bundle_id] }
-
-        if app.nil?
-          UI.error "No application with bundle id #{config[:bundle_id]}"
+        if releases.nil?
+          UI.error "No versions found for #{config[:app_name]} owned by #{config[:owner_name]}"
           return nil
         end
 
-        app_identifier = app['public_identifier']
-
-        details_request = Net::HTTP::Get.new("/api/2/apps/#{app_identifier}/app_versions?page=1")
-        details_request['X-HockeyAppToken'] = config[:api_token]
-        details_response = http.request(details_request)
-
-        app_details = JSON.parse(details_response.body)
-        latest_build = app_details['app_versions'].find{ |version| version['status'] != -1 }
+        releases.sort_by { |release| release['id'] }
+        latest_build = releases.first
 
         if latest_build.nil?
           UI.error "The app has no versions yet"
@@ -38,27 +30,32 @@ module Fastlane
       end
 
       def self.description
-        "Gets latest version number of the app with the bundle id from HockeyApp"
+        "Gets latest version number of the app from AppCenter"
       end
 
       def self.authors
-        ["pahnev", "FlixBus (original author)"]
+        ["jspargo", "ShopKeep", "pahnev", "FlixBus (original author)"]
       end
 
       def self.available_options
         [
           FastlaneCore::ConfigItem.new(key: :api_token,
-                                       env_name: "FL_HOCKEY_API_TOKEN",
-                                       description: "API Token for Hockey Access",
+                                       env_name: "APPCENTER_API_TOKEN",
+                                       description: "API Token for AppCenter Access",
                                        verify_block: proc do |value|
-                                         UI.user_error!("No API token for Hockey given, pass using `api_token: 'token'`") unless value and !value.empty?
+                                         UI.user_error!("No API token for AppCenter given, pass using `api_token: 'token'`") unless value and !value.empty?
                                        end),
-          FastlaneCore::ConfigItem.new(key: :bundle_id,
-                                       env_name: "FL_HOCKEY_BUNDLE_ID",
-                                       description: "Bundle ID of the application",
-                                       default_value: CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
+          FastlaneCore::ConfigItem.new(key: :owner_name,
+                                       env_name: "APPCENTER_OWNER_NAME",
+                                       description: "Name of the owner of the application on AppCenter",
                                        verify_block: proc do |value|
-                                         UI.user_error!("No bundle ID for Hockey given, pass using `bundle_id: 'bundle id'`") unless value and !value.empty?
+                                         UI.user_error!("No owner name for AppCenter given, pass using `owner_name: 'owner name'`") unless value and !value.empty?
+                                       end),
+          FastlaneCore::ConfigItem.new(key: :app_name,
+                                       env_name: "APPCENTER_APP_NAME",
+                                       description: "Name of the application on AppCenter",
+                                       verify_block: proc do |value|
+                                         UI.user_error!("No app name for AppCenter given, pass using `app_name: 'app name'`") unless value and !value.empty?
                                        end),
         ]
       end
