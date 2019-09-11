@@ -1,3 +1,4 @@
 lane :test do
-  latest_appcenter_build_number
+  version_number = latest_appcenter_build_number
+  puts(version_number)
 end
