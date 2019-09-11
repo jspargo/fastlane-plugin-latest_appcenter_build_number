@@ -8,12 +8,30 @@ module Fastlane
   module Actions
     class LatestAppcenterBuildNumberAction < Action
       def self.run(config)
+        if !checkValidAppName(config[:app_name])
+          UI.user_error!("The `app_name` ('#{config[:app_name]}') cannot contains spaces and must only contain alpha numeric characters and dashes")
+          return nil
+        end
+
         app_name = config[:app_name]
         owner_name = config[:owner_name]
-        if app_name.nil? || owner_name.nil?
+        if app_name.nil? && owner_name.nil?
           owner_and_app_name = get_owner_and_app_name(config[:api_token])
           app_name = owner_and_app_name[0]
           owner_name = owner_and_app_name[1]
+        end
+
+        if owner_name.nil?
+          owner_name = get_owner_name(config[:api_token], app_name)
+        end
+
+        if app_name.nil?
+          app_name = get_owner_and_app_name(config[:api_token])[0]
+        end
+
+        if app_name.nil? || owner_name.nil?
+          UI.user_error!("No app '#{app_name}' found for owner #{owner_name}")
+          return nil
         end
 
         host_uri = URI.parse('https://api.appcenter.ms')
@@ -24,13 +42,18 @@ module Fastlane
         list_response = http.request(list_request)
 
         if list_response.kind_of?(Net::HTTPForbidden)
-          UI.error("API Key not valid for #{owner_name}. This will be because either the API Key or the owner_name are incorrect")
+          UI.user_error!("API Key not valid for '#{owner_name}'. This will be because either the API Key or the `owner_name` are incorrect")
+          return nil
+        end
+
+        if list_response.kind_of?(Net::HTTPNotFound)
+          UI.user_error!("No app or owner found with `app_name`: '#{app_name}' and `owner_name`: '#{owner_name}'")
           return nil
         end
 
         releases = JSON.parse(list_response.body)
         if releases.nil?
-          UI.error("No versions found for #{app_name} owned by #{owner_name}")
+          UI.user_error!("No versions found for '#{app_name}' owned by #{owner_name}")
           return nil
         end
 
@@ -38,7 +61,7 @@ module Fastlane
         latest_build = releases.first
 
         if latest_build.nil?
-          UI.error("The app has no versions yet")
+          UI.user_error!("The app has no versions yet")
           return nil
         end
 
@@ -86,11 +109,25 @@ module Fastlane
         apps = get_apps(api_token)
         app_names = apps.map { |app| app['name'] }.sort
         selected_app_name = UI.select("Select your project: ", app_names)
-        selected_app = apps.select { |app| app['name'] == selected_app_name }.first
+        app_matches = apps.select { |app| app['name'] == selected_app_name }
+        return unless app_matches.count > 0
+        selected_app = app_matches.first
 
         name = selected_app['name'].to_s
         owner = selected_app['owner']['name'].to_s
         return name, owner
+      end
+
+      def self.get_owner_name(api_token, app_name)
+        apps = get_apps(api_token)
+        return unless apps.count > 0
+        app_names = apps.map { |app| app['name'] }.sort
+        app_matches = apps.select { |app| app['name'] == app_name }
+        return unless app_matches.count > 0
+        selected_app = app_matches.first
+
+        owner = selected_app['owner']['name'].to_s
+        return owner
       end
 
       def self.get_apps(api_token)
@@ -100,8 +137,13 @@ module Fastlane
         apps_request = Net::HTTP::Get.new("/v0.1/apps")
         apps_request['X-API-Token'] = api_token
         apps_response = http.request(apps_request)
-        apps = JSON.parse(apps_response.body)
-        return apps
+        return [] unless apps_response.kind_of?(Net::HTTPOK)
+        return JSON.parse(apps_response.body)
+      end
+
+      def self.checkValidAppName(app_name)
+        regexp = /^[a-zA-Z0-9\-]+$/i
+        return regexp.match?(app_name)
       end
     end
   end
