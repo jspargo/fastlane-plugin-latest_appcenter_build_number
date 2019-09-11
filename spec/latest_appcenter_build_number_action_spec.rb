@@ -51,17 +51,17 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
       end.to raise_error("No app 'App-Name-Does-Not-Exist' found for owner ")
     end
 
-        # it "raises an error if no app name was given" do
-        #   stub_get_apps_success(200)
-        #   expect do
-        #     Fastlane::FastFile.new.parse("lane :test do
-        #       latest_appcenter_build_number(
-        #         api_token: '1234',
-        #         owner_name: 'owner-name',
-        #       )
-        #     end").runner.execute(:test)
-        #   end.to raise_error("No App name given, pass using `app_name: 'app name'`")
-        # end
+    # it "raises an error if no app name was given" do
+    #   stub_get_apps_success(200)
+    #   expect do
+    #     Fastlane::FastFile.new.parse("lane :test do
+    #       latest_appcenter_build_number(
+    #         api_token: '1234',
+    #         owner_name: 'owner-name',
+    #       )
+    #     end").runner.execute(:test)
+    #   end.to raise_error("No App name given, pass using `app_name: 'app name'`")
+    # end
 
     it "raises an error if the app name contains spaces" do
       expect do
