@@ -111,18 +111,6 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
       end.to raise_error("The `owner_name` ('**/Owner name!!') cannot contains spaces and must only contain lowercased alpha numeric characters and dashes")
     end
 
-    it "correctly converts the owner name to lower case" do
-      stub_get_releases_success(200)
-      build_number = Fastlane::FastFile.new.parse("lane :test do
-        latest_appcenter_build_number(
-          api_token: '1234',
-          owner_name: 'oWnEr-NaMe',
-          app_name: 'App-Name'
-        )
-      end").runner.execute(:test)
-      expect(build_number).to eq('1.0.0.101')
-    end
-
     it "raises an error if the app name does not exist for an owner/account" do
       stub_get_releases_forbidden(403)
       expect do

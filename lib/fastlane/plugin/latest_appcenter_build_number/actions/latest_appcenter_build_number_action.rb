@@ -42,7 +42,7 @@ module Fastlane
         host_uri = URI.parse('https://api.appcenter.ms')
         http = Net::HTTP.new(host_uri.host, host_uri.port)
         http.use_ssl = true
-        list_request = Net::HTTP::Get.new("/v0.1/apps/#{owner_name.downcase}/#{app_name}/releases")
+        list_request = Net::HTTP::Get.new("/v0.1/apps/#{owner_name}/#{app_name}/releases")
         list_request['X-API-Token'] = config[:api_token]
         list_response = http.request(list_request)
 
