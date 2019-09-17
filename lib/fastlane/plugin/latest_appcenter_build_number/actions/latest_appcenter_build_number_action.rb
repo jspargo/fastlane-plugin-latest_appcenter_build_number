@@ -8,7 +8,7 @@ module Fastlane
   module Actions
     class LatestAppcenterBuildNumberAction < Action
       def self.run(config)
-        unless check_valid_app_name(config[:app_name])
+        unless check_valid_name(config[:app_name])
           UI.user_error!("The `app_name` ('#{config[:app_name]}') cannot contains spaces and must only contain alpha numeric characters and dashes")
           return nil
         end
@@ -23,6 +23,11 @@ module Fastlane
 
         if owner_name.nil?
           owner_name = get_owner_name(config[:api_token], app_name)
+        else
+          unless check_valid_name(owner_name)
+            UI.user_error!("The `owner_name` ('#{owner_name}') cannot contains spaces and must only contain lowercased alpha numeric characters and dashes")
+            return nil
+          end
         end
 
         if app_name.nil?
@@ -37,7 +42,7 @@ module Fastlane
         host_uri = URI.parse('https://api.appcenter.ms')
         http = Net::HTTP.new(host_uri.host, host_uri.port)
         http.use_ssl = true
-        list_request = Net::HTTP::Get.new("/v0.1/apps/#{owner_name}/#{app_name}/releases")
+        list_request = Net::HTTP::Get.new("/v0.1/apps/#{owner_name.downcase}/#{app_name}/releases")
         list_request['X-API-Token'] = config[:api_token]
         list_response = http.request(list_request)
 
@@ -140,9 +145,9 @@ module Fastlane
         return JSON.parse(apps_response.body)
       end
 
-      def self.check_valid_app_name(app_name)
+      def self.check_valid_name(name)
         regexp = /^[a-zA-Z0-9\-]+$/i
-        return regexp.match?(app_name)
+        return regexp.match?(name)
       end
     end
   end
