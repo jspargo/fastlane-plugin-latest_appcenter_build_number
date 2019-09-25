@@ -1,4 +1,4 @@
-name: Run specs and rubocop
+name: Run PR tests (specs and rubocop)
 
 on:
   pull_request:
