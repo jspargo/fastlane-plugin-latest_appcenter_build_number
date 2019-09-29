@@ -87,6 +87,30 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
       end.to raise_error("The `app_name` ('App-Name!@£$') cannot contains spaces and must only contain alpha numeric characters and dashes")
     end
 
+    it "raises an error if the owner name contains spaces" do
+      expect do
+        Fastlane::FastFile.new.parse("lane :test do
+          latest_appcenter_build_number(
+            api_token: '1234',
+            owner_name: 'owner name',
+            app_name: 'App-Name'
+          )
+        end").runner.execute(:test)
+      end.to raise_error("The `owner_name` ('owner name') cannot contains spaces and must only contain lowercased alpha numeric characters and dashes")
+    end
+
+    it "raises an error if owner name contains special characters" do
+      expect do
+        Fastlane::FastFile.new.parse("lane :test do
+          latest_appcenter_build_number(
+            api_token: '1234',
+            owner_name: '**/Owner name!!',
+            app_name: 'App-Name'
+          )
+        end").runner.execute(:test)
+      end.to raise_error("The `owner_name` ('**/Owner name!!') cannot contains spaces and must only contain lowercased alpha numeric characters and dashes")
+    end
+
     it "raises an error if the app name does not exist for an owner/account" do
       stub_get_releases_forbidden(403)
       expect do
