@@ -1,15 +1,9 @@
 name: Publish to Rubygems
 
-on: push
-
-jobs:
-  filter-tags:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-      with:
-        args: tag v*
-
+on:
+  push:
+    branches:
+      - refs/tags/v*
 
   deploy:
     needs: filter-tags
