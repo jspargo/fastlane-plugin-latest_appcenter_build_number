@@ -8,17 +8,19 @@ module Fastlane
   module Actions
     class LatestAppcenterBuildNumberAction < Action
       def self.run(config)
-        unless check_valid_name(config[:app_name])
-          UI.user_error!("The `app_name` ('#{config[:app_name]}') cannot contains spaces and must only contain alpha numeric characters and dashes")
-          return nil
-        end
-
         app_name = config[:app_name]
         owner_name = config[:owner_name]
         if app_name.nil? && owner_name.nil?
           owner_and_app_name = get_owner_and_app_name(config[:api_token])
           app_name = owner_and_app_name[0]
           owner_name = owner_and_app_name[1]
+        end
+
+        unless app_name.nil?
+          unless check_valid_name(app_name)
+            UI.user_error!("The `app_name` ('#{app_name}') cannot contains spaces and must only contain alpha numeric characters and dashes")
+            return nil
+          end
         end
 
         if owner_name.nil?
