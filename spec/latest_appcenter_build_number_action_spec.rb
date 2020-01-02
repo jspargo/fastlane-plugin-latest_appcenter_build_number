@@ -146,19 +146,7 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
           app_name: 'App-Name'
         )
       end").runner.execute(:test)
-      expect(build_number).to eq('1.0.0.101')
-    end
-
-    it "raises an error if no owner name was given" do
-      stub_get_apps_success(200)
-      stub_get_releases_success(200)
-      build_number = Fastlane::FastFile.new.parse("lane :test do
-        latest_appcenter_build_number(
-          api_token: '1234',
-          app_name: 'App-Name'
-        )
-      end").runner.execute(:test)
-      expect(build_number).to eq('1.0.0.101')
+      expect(build_number).to eq('1.0.4.105')
     end
   end
 end
