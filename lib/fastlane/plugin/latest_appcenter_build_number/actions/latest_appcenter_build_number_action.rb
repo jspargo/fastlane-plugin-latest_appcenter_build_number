@@ -64,8 +64,8 @@ module Fastlane
           return nil
         end
 
-        releases.sort_by { |release| release['id'] }
-        latest_build = releases.first
+        sorted_release = releases.sort_by { |release| release['id'] }.reverse!
+        latest_build = sorted_release.first
 
         if latest_build.nil?
           UI.user_error!("The app has no versions yet")
