@@ -1,11 +1,13 @@
 $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
 
 require 'simplecov'
+require 'simplecov-cobertura'
 require 'webmock'
 require 'webmock/rspec'
 
-# SimpleCov.minimum_coverage 95
+SimpleCov.minimum_coverage(80)
 SimpleCov.start
+SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
 
 def stub_request(*args)
   WebMock::API.stub_request(*args)

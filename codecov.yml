@@ -1,2 +1,6 @@
 ignore:
-  -  spec/**/*
+  -  spec/*
+coverage:
+  range: 85..100
+  round: down
+  precision: 2

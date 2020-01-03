@@ -1,5 +1,6 @@
 source('https://rubygems.org')
 
+gem "simplecov-cobertura"
 gem "webmock"
 
 gemspec
