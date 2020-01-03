@@ -7,6 +7,14 @@ module Fastlane
 
   module Actions
     class LatestAppcenterBuildNumberAction < Action
+      def self.description
+        "Gets latest version number of the app from AppCenter"
+      end
+
+      def self.authors
+        ["jspargo", "ShopKeep", "pahnev", "FlixBus (original author)"]
+      end
+
       def self.run(config)
         app_name = config[:app_name]
         owner_name = config[:owner_name]
@@ -17,7 +25,7 @@ module Fastlane
         end
 
         unless app_name.nil?
-          unless check_valid_name(app_name)
+          unless Helper::LatestAppcenterBuildNumberHelper.check_valid_name(app_name)
             UI.user_error!("The `app_name` ('#{app_name}') cannot contains spaces and must only contain alpha numeric characters and dashes")
             return nil
           end
@@ -26,7 +34,7 @@ module Fastlane
         if owner_name.nil?
           owner_name = get_owner_name(config[:api_token], app_name)
         else
-          unless check_valid_name(owner_name)
+          unless Helper::LatestAppcenterBuildNumberHelper.check_valid_name(owner_name)
             UI.user_error!("The `owner_name` ('#{owner_name}') cannot contains spaces and must only contain lowercased alpha numeric characters and dashes")
             return nil
           end
@@ -73,14 +81,6 @@ module Fastlane
         end
 
         return latest_build['version']
-      end
-
-      def self.description
-        "Gets latest version number of the app from AppCenter"
-      end
-
-      def self.authors
-        ["jspargo", "ShopKeep", "pahnev", "FlixBus (original author)"]
       end
 
       def self.available_options
@@ -145,11 +145,6 @@ module Fastlane
         apps_response = http.request(apps_request)
         return [] unless apps_response.kind_of?(Net::HTTPOK)
         return JSON.parse(apps_response.body)
-      end
-
-      def self.check_valid_name(name)
-        regexp = /^[a-zA-Z0-9\-]+$/i
-        return regexp.match?(name)
       end
     end
   end
