@@ -4,6 +4,12 @@ def stub_get_releases_success(status)
     .to_return(status: status, body: success_json.to_json, headers: { 'Content-Type' => 'application/json' })
 end
 
+def stub_get_releases_empty_success(status)
+  success_json = JSON.parse(File.read("spec/fixtures/valid_release_empty_response.json"))
+  stub_request(:get, "https://api.appcenter.ms/v0.1/apps/owner-name/App-Name-no-versions/releases")
+    .to_return(status: status, body: success_json.to_json, headers: { 'Content-Type' => 'application/json' })
+end
+
 def stub_get_releases_not_found(status)
   not_found_json = JSON.parse(File.read("spec/fixtures/not_found.json"))
   stub_request(:get, "https://api.appcenter.ms/v0.1/apps/owner-name/App-Name/releases")
@@ -21,6 +27,7 @@ def stub_get_apps_success(status)
   stub_request(:get, "https://api.appcenter.ms/v0.1/apps")
     .to_return(status: status, body: success_json.to_json, headers: { 'Content-Type' => 'application/json' })
 end
+
 
 describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
   describe '#run' do
@@ -138,6 +145,21 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
             )
           end").runner.execute(:test)
         end.to raise_error("No app or owner found with `app_name`: 'App-Name' and `owner_name`: 'owner-name'")
+      end
+    end
+
+    context 'when the no app versions exist' do
+      it 'raises an error' do
+        stub_get_releases_empty_success(200)
+        expect do
+          Fastlane::FastFile.new.parse("lane :test do
+            latest_appcenter_build_number(
+              api_token: '1234',
+              owner_name: 'owner-name',
+              app_name: 'App-Name-no-versions'
+            )
+          end").runner.execute(:test)
+        end.to raise_error("The app has no versions yet")
       end
     end
 
