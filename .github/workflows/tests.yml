@@ -15,9 +15,12 @@ jobs:
       with:
         ruby-version: 2.6.x
     - name: Build and test with Rake
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       run: |
         gem install bundler
         bundle install --jobs 4 --retry 3
         bundle exec rake
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} #required
+        fail_ci_if_error: true #optional (default = false)

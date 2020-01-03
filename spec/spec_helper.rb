@@ -4,7 +4,7 @@ require 'simplecov'
 require 'webmock'
 require 'webmock/rspec'
 
-SimpleCov.minimum_coverage 90
+SimpleCov.minimum_coverage 80
 SimpleCov.start
 
 def stub_request(*args)
