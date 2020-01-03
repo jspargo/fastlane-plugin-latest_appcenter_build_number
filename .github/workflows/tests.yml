@@ -22,5 +22,7 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        token: ${{ secrets.CODECOV_TOKEN }} #required
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: coverage/resultset.json
+        # yml: ./codecov.yml #optional
         fail_ci_if_error: true #optional (default = false)
