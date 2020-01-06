@@ -28,7 +28,6 @@ def stub_get_apps_success(status)
     .to_return(status: status, body: success_json.to_json, headers: { 'Content-Type' => 'application/json' })
 end
 
-
 describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
   describe '#run' do
     before :each do
@@ -207,7 +206,7 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
     # end
 
     context 'when a valid owner, app name, and token build numbers are requested' do
-      let(:build_number) {
+      let(:build_number) do
         build_number = Fastlane::FastFile.new.parse("lane :test do
           latest_appcenter_build_number(
             api_token: '1234',
@@ -215,7 +214,7 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
             app_name: 'App-Name'
           )
         end").runner.execute(:test)
-      }
+      end
 
       before do
         stub_get_releases_success(200)
