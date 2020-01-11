@@ -162,7 +162,8 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
       end
     end
 
-    let(:app) do {
+    let(:app) do
+      {
       "display_name" => "My App Name",
           "name" => 'App-Name',
           "owner" => {
@@ -174,13 +175,13 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
     end
 
     context 'when no app name or owner/account are set' do
-      let(:build_number) {
+      let(:build_number) do
         build_number = Fastlane::FastFile.new.parse("lane :test do
           latest_appcenter_build_number(
             api_token: '1234'
           )
         end").runner.execute(:test)
-      }
+      end
 
       before do
         allow(Fastlane::Actions::LatestAppcenterBuildNumberAction).to receive(:prompt_for_apps).and_return([app])
@@ -195,14 +196,14 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
     end
 
     context 'when no app name is set' do
-      let(:build_number) {
+      let(:build_number) do
         build_number = Fastlane::FastFile.new.parse("lane :test do
           latest_appcenter_build_number(
             api_token: '1234',
             owner_name: 'owner-name'
           )
         end").runner.execute(:test)
-      }
+      end
 
       before do
         allow(Fastlane::Actions::LatestAppcenterBuildNumberAction).to receive(:prompt_for_apps).and_return([app])
