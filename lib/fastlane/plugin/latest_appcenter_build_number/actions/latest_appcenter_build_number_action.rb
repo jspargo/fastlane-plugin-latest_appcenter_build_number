@@ -7,6 +7,14 @@ module Fastlane
 
   module Actions
     class LatestAppcenterBuildNumberAction < Action
+      def self.description
+        "Gets latest version number of the app from AppCenter"
+      end
+
+      def self.authors
+        ["jspargo", "ShopKeep", "pahnev", "FlixBus (original author)"]
+      end
+
       def self.run(config)
         app_name = config[:app_name]
         owner_name = config[:owner_name]
@@ -17,7 +25,7 @@ module Fastlane
         end
 
         unless app_name.nil?
-          unless check_valid_name(app_name)
+          unless Helper::LatestAppcenterBuildNumberHelper.check_valid_name(app_name)
             UI.user_error!("The `app_name` ('#{app_name}') cannot contains spaces and must only contain alpha numeric characters and dashes")
             return nil
           end
@@ -26,7 +34,7 @@ module Fastlane
         if owner_name.nil?
           owner_name = get_owner_name(config[:api_token], app_name)
         else
-          unless check_valid_name(owner_name)
+          unless Helper::LatestAppcenterBuildNumberHelper.check_valid_name(owner_name)
             UI.user_error!("The `owner_name` ('#{owner_name}') cannot contains spaces and must only contain lowercased alpha numeric characters and dashes")
             return nil
           end
@@ -75,14 +83,6 @@ module Fastlane
         return latest_build['version']
       end
 
-      def self.description
-        "Gets latest version number of the app from AppCenter"
-      end
-
-      def self.authors
-        ["jspargo", "ShopKeep", "pahnev", "FlixBus (original author)"]
-      end
-
       def self.available_options
         [
           FastlaneCore::ConfigItem.new(key: :api_token,
@@ -114,12 +114,9 @@ module Fastlane
 
       def self.get_owner_and_app_name(api_token)
         apps = get_apps(api_token)
-        app_names = apps.map { |app| app['name'] }.sort
-        selected_app_name = UI.select("Select your project: ", app_names)
-        app_matches = apps.select { |app| app['name'] == selected_app_name }
+        app_matches = prompt_for_apps(apps)
         return unless app_matches.count > 0
         selected_app = app_matches.first
-
         name = selected_app['name'].to_s
         owner = selected_app['owner']['name'].to_s
         return name, owner
@@ -147,9 +144,10 @@ module Fastlane
         return JSON.parse(apps_response.body)
       end
 
-      def self.check_valid_name(name)
-        regexp = /^[a-zA-Z0-9\-]+$/i
-        return regexp.match?(name)
+      def self.prompt_for_apps(apps)
+        app_names = apps.map { |app| app['name'] }.sort
+        selected_app_name = UI.select("Select your project: ", app_names)
+        return apps.select { |app| app['name'] == selected_app_name }
       end
     end
   end
