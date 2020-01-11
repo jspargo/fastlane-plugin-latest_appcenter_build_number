@@ -114,12 +114,9 @@ module Fastlane
 
       def self.get_owner_and_app_name(api_token)
         apps = get_apps(api_token)
-        app_names = apps.map { |app| app['name'] }.sort
-        selected_app_name = UI.select("Select your project: ", app_names)
-        app_matches = apps.select { |app| app['name'] == selected_app_name }
+        app_matches = prompt_for_apps(apps)
         return unless app_matches.count > 0
         selected_app = app_matches.first
-
         name = selected_app['name'].to_s
         owner = selected_app['owner']['name'].to_s
         return name, owner
@@ -145,6 +142,12 @@ module Fastlane
         apps_response = http.request(apps_request)
         return [] unless apps_response.kind_of?(Net::HTTPOK)
         return JSON.parse(apps_response.body)
+      end
+
+      def self.prompt_for_apps(apps)
+        app_names = apps.map { |app| app['name'] }.sort
+        selected_app_name = UI.select("Select your project: ", app_names)
+        return apps.select { |app| app['name'] == selected_app_name }
       end
     end
   end
