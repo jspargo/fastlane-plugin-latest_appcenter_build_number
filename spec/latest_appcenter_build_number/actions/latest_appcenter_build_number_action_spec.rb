@@ -216,6 +216,27 @@ describe Fastlane::Actions::LatestAppcenterBuildNumberAction do
       end
     end
 
+    context 'when no owner name is set' do
+      let(:build_number) do
+        build_number = Fastlane::FastFile.new.parse("lane :test do
+          latest_appcenter_build_number(
+            api_token: '1234',
+            app_name: 'App-Name'
+          )
+        end").runner.execute(:test)
+      end
+
+      before do
+        allow(Fastlane::Actions::LatestAppcenterBuildNumberAction).to receive(:prompt_for_apps).and_return([app])
+        stub_get_apps_success(200)
+        stub_get_releases_success(200)
+      end
+
+      it 'prompts for an app name' do
+        expect(build_number).to eq('1.0.4.105')
+      end
+    end
+
     context 'when a valid owner, app name, and token build numbers are requested' do
       let(:build_number) do
         build_number = Fastlane::FastFile.new.parse("lane :test do
