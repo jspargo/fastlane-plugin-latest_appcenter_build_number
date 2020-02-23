@@ -16,6 +16,17 @@ module Fastlane
       end
 
       def self.run(config)
+        UI.deprecated("- - - - - - - - - - - - - - - - - - - - - -")
+        UI.deprecated("This fastlane plugin is deprecated!")
+        UI.deprecated("While it won't be removed any time soon, it's unlikely")
+        UI.deprecated("to be enhanced or have any bugs fixes applied.")
+        UI.deprecated("- - - - - - - - - - - - - - - - - - - - - -")
+        UI.deprecated("Please use 'fastlane-plugin-appcenter' into which this")
+        UI.deprecated("functionality has recently been merged.")
+        UI.deprecated("Use the action named `appcenter_fetch_version_number`:")
+        UI.deprecated("https://github.com/microsoft/fastlane-plugin-appcenter")
+        UI.deprecated("- - - - - - - - - - - - - - - - - - - - - -")
+
         app_name = config[:app_name]
         owner_name = config[:owner_name]
         if app_name.nil? && owner_name.nil?
