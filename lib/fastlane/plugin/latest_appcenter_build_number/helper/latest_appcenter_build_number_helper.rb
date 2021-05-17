@@ -7,7 +7,7 @@ module Fastlane
       # as `Helper::LatestAppcenterBuildNumberHelper.your_method`
       #
       def self.check_valid_name(name)
-        regexp = /^[a-zA-Z0-9\-]+$/i
+        regexp = /^[a-zA-Z0-9\-\.]+$/i
         return regexp.match?(name)
       end
     end
